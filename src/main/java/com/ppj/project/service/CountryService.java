@@ -1,14 +1,12 @@
 package com.ppj.project.service;
 
-import com.ppj.project.data.City;
 import com.ppj.project.data.Country;
 import com.ppj.project.repositories.CountryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import java.util.Optional;
 
 @Service
 public class CountryService {
@@ -26,7 +24,7 @@ public class CountryService {
     public boolean exists(String countryCode) { return countryRepository.existsById(countryCode); }
 
     public List<Country> getAllCountries() {
-        return StreamSupport.stream(countryRepository.findAll().spliterator(), false).collect(Collectors.toList());
+        return countryRepository.findAll();
     }
 
     public void saveOrUpdate(Country country) {
@@ -36,5 +34,11 @@ public class CountryService {
     public void delete(String id) {
         countryRepository.deleteById(id);
     }
+
+    public Country getByCountryCode(String countryCode){
+        Optional<Country> c =  countryRepository.findById(countryCode);
+        if(c.isPresent())return c.get();
+        else return null;
+    };
 
 }

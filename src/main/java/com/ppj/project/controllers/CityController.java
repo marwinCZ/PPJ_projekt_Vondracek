@@ -14,20 +14,28 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import java.util.List;
 
 @Controller
-public class CountryController {
+public class CityController {
+    private CityService cityService;
     private CountryService countryService;
+
+    @Autowired
+    public void setCityService(CityService cityService) {
+        this.cityService = cityService;
+    }
 
     @Autowired
     public void setCountryService(CountryService countryService) {
         this.countryService = countryService;
     }
 
-    @RequestMapping("/")
-    public String showHome(Model model) {
-        List<Country> countries = countryService.getAllCountries();
+    @RequestMapping(value="/{countryCode}", method= RequestMethod.GET)
+    public String findUser(@PathVariable("countryCode") String countryCode, Model model) {
 
-        model.addAttribute("countries", countries);
-        return "home";
+        List<City> cities = cityService.getAllCitiesByCountry(countryCode);
+        model.addAttribute("cities", cities);
+
+        Country country = countryService.getByCountryCode(countryCode);
+        model.addAttribute("country", country);
+        return "country";
     }
-
 }
