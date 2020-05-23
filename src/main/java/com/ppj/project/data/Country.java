@@ -1,9 +1,7 @@
 package com.ppj.project.data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table(name = "countries")
@@ -16,12 +14,15 @@ public class Country {
     @Column(name = "countryName")
     private String countryName;
 
+    @OneToMany(mappedBy="country", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<City> cities;
+
     public String getCountryCode() {
         return countryCode;
     }
 
     public void setCountryCode(String countryCode) {
-        this.countryCode = countryCode;
+        this.countryCode = countryCode.trim().toUpperCase();
     }
 
     public String getCountryName() {

@@ -1,7 +1,5 @@
 package com.ppj.project.controllers;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.ppj.project.data.Country;
 import com.ppj.project.service.CountryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +10,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.io.*;
-import java.util.Iterator;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
 
 @Controller
@@ -35,11 +34,10 @@ public class CountryController {
     }
 
     @RequestMapping(value="/",method=RequestMethod.POST, params={"add", "!delete"})
-    public String addCountry(@ModelAttribute("country") Country country) {
-        String name = getCountryNameFromJson(country.getCountryCode());
-        if(name != "error") return "redirect:/ ";
-        country.setCountryName(name);
-        countryService.saveOrUpdate(country);
+    public String addCountry(@ModelAttribute("country") Country newCountry) {
+        String name = getCountryNameFromFile(newCountry.getCountryCode());
+        newCountry.setCountryName(name);
+        countryService.saveOrUpdate(newCountry);
         return "redirect:/ ";
     }
 
@@ -49,21 +47,21 @@ public class CountryController {
         return "redirect:/ ";
     }
 
-    private String getCountryNameFromJson(String countryCode){
-        InputStream resource = null;
-        String line,input="";
-        try {
-            resource = new ClassPathResource("countryNamesAndCodes.json").getInputStream();
-            try ( BufferedReader reader = new BufferedReader(new InputStreamReader(resource)) ) {
-                while ((line = reader.readLine()) != null)input+=line;
-                JsonObject jsonObject = new JsonParser().parse(input).getAsJsonObject();
-                if(jsonObject.has(countryCode)) return jsonObject.get(countryCode).toString();
-
+    private String getCountryNameFromFile(String countryCode){
+        String row;
+        try{
+            String resourceFile = new ClassPathResource("data/data_countries.csv").getPath();
+            BufferedReader csvReader = new BufferedReader(new FileReader(resourceFile));
+            while ((row = csvReader.readLine()) != null) {
+                String[] data = row.split(",");
+                if(data[1].equals(countryCode))return data[0];
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            csvReader.close();
+
+        }catch( IOException e){
+            return "error";
         }
-        return "error";
+        return "not found";
     }
 
 }
